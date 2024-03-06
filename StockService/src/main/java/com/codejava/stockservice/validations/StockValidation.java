@@ -6,6 +6,8 @@ import com.codejava.orderapp.entities.order.OrderItem;
 import java.util.List;
 
 public class StockValidation {
+    private StockValidation() {
+    }
 
     public static boolean validateStock(List<OrderItem> items) {
         Boolean isValidOrder = true;

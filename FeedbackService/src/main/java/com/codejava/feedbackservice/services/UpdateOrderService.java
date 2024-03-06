@@ -20,6 +20,9 @@ import java.util.List;
 @Service
 public class UpdateOrderService {
 
+    public static final String ACCEPTED = "ACCEPTED";
+    public static final String REJECTED = "REJECTED";
+    public static final String PENDING = "PENDING";
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
@@ -31,7 +34,6 @@ public class UpdateOrderService {
 
     // Process validation response received from Kafka and save it
     public void processValidationResponse(Long orderId, String response) {
-        Order order = orderRepository.getReferenceById(orderId);
         String[] details = response.split("_");
         ValidationResponse validationResponse = ValidationResponse.builder()
                 .orderId(orderId)
@@ -44,26 +46,39 @@ public class UpdateOrderService {
     // Update order status based on validation responses
     public String updateOrderStatus(Long orderId) {
         List<ValidationResponse> responses = validationResponseRepository.findByOrderId(orderId);
-        if (responses.size() > 1) {
-            boolean isAccepted = true;
-            for (ValidationResponse response : responses) {
-                if (!response.getResponse().equals("ACCEPTED")) {
-                    isAccepted = false;
-                    Order order = orderRepository.getReferenceById(orderId);
-                    order.setStatus(OrderStatus.REJECTED);
-                    orderRepository.save(order);
-                    return "REJECTED";
-                }
-            }
-            if (isAccepted) {
-                // Update order status to ACCEPTED in the database
-                Order order = orderRepository.getReferenceById(orderId);
-                order.setStatus(OrderStatus.ACCEPTED);
-                orderRepository.save(order);
-                return "ACCEPTED";
+        if (responses.size() <= 1) return PENDING;
+        Order order = getOrderById(orderId);
+        for (ValidationResponse response : responses) {
+            if (!response.getResponse().equals(ACCEPTED)) {
+                updateOrderStatus(order, OrderStatus.REJECTED);
+                return REJECTED;
             }
         }
-        return "PENDING";
+        // Update order status to ACCEPTED in the database
+        updateOrderStatus(order, OrderStatus.ACCEPTED);
+        return ACCEPTED;
+    }
+
+    // Update product stock after order is accepted
+    public void updateStock(Long orderId) {
+        Order order = getOrderById(orderId);
+        List<OrderItem> items = order.getItems();
+        for (OrderItem item : items) {
+            Product product = item.getProduct();
+            product.setQuantity(product.getQuantity() - item.getQuantity());
+            productRepository.save(product);
+
+        }
+
+    }
+
+    public void updateOrderStatus(Order order, OrderStatus status) {
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
+
+    public Order getOrderById(Long orderId) {
+        return orderRepository.getReferenceById(orderId);
     }
 
     // Send email notification to the customer about order status
@@ -78,9 +93,9 @@ public class UpdateOrderService {
         if (order.getStatus().equals(OrderStatus.REJECTED)) {
             List<ValidationResponse> validationResponses = validationResponseRepository.findByOrderId(orderId);
             for (ValidationResponse response : validationResponses) {
-                if (response.getTypeOfValidation().equals("StockService") && response.getResponse().equals("REJECTED"))
+                if (response.getTypeOfValidation().equals("StockService") && response.getResponse().equals(REJECTED))
                     emailBody.append("We don't have enough products in stock to accept your order.").append("\n\n");
-                if (response.getTypeOfValidation().equals("PaymentService") && response.getResponse().equals("REJECTED"))
+                if (response.getTypeOfValidation().equals("PaymentService") && response.getResponse().equals(REJECTED))
                     emailBody.append("Your bank account details are incorrect. Please try again to send the order with the correct bank account details").append("\n\n");
             }
         }
@@ -102,16 +117,5 @@ public class UpdateOrderService {
         mailSender.send(message);
     }
 
-    // Update product stock after order is accepted
-    public void updateStock(Long orderId) {
-        Order order = orderRepository.getReferenceById(orderId);
-        List<OrderItem> items = order.getItems();
-        for (OrderItem item : items) {
-            Product product = item.getProduct();
-            product.setQuantity(product.getQuantity() - item.getQuantity());
-            productRepository.save(product);
 
-        }
-
-    }
 }

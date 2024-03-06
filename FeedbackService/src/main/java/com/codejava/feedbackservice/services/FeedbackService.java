@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 
 public class FeedbackService {
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final UpdateOrderService updateOrderService;
 
@@ -23,26 +23,24 @@ public class FeedbackService {
     public void handle(ConsumerRecord<Long, String> response) {
         // Extracting orderId and response from the Kafka message
         Long orderId = response.key();
-
-        LOGGER.info("Received a new event: " + orderId + " " + response.value());
+        logger.info("Received a new event: %ld - %s", orderId, response.value());
         // Process validation response
         updateOrderService.processValidationResponse(orderId, response.value());
         if (updateOrderService.updateOrderStatus(orderId).equals("ACCEPTED")) {
-            LOGGER.info("Order " + orderId + " is accepted!");
+            logger.info("Order {} is accepted!", orderId);
             //update stock
             updateOrderService.updateStock(orderId);
-
             //Uncomment this to send notifications via email, and also configure the username and password for sending emails
             // updateOrderService.sendEmailToCustomer(orderId);
 
         } else if (updateOrderService.updateOrderStatus(orderId).equals("REJECTED")) {
-            LOGGER.info("Order " + orderId + "is rejected");
+            logger.info("Order {} is rejected", orderId);
 
             //send email to inform user
             // updateOrderService.sendEmailToCustomer(orderId);
 
         } else {
-            LOGGER.info("Order " + orderId + " is in pending..");
+            logger.info("Order {} is in pending..", orderId);
         }
 
     }
