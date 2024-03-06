@@ -1,4 +1,4 @@
-package controllers;
+package com.codejava.feedbackservice.controllers;
 
 import com.codejava.feedbackservice.services.OrderService;
 import com.codejava.orderapp.entities.order.Order;
