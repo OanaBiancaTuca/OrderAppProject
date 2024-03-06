@@ -17,14 +17,18 @@ import java.util.List;
 @RequestMapping("/accounts")
 @Validated
 public class BankAccountController {
-    @Autowired
     BankAccountService bankService;
+
+    @Autowired
+    public BankAccountController(BankAccountService bankService) {
+        this.bankService = bankService;
+    }
 
     @PostMapping("")
     public ResponseEntity<String> addAccount(@Valid @RequestBody BankAccount account) {
         String responseValidate = bankService.validateBankAccount(account);
         if (responseValidate.equals("OK")) {
-            BankAccount savedAccount = bankService.addAccount(account);
+            bankService.addAccount(account);
             return ResponseEntity.status(HttpStatus.CREATED).body("Account is successfully saved ");
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseValidate);

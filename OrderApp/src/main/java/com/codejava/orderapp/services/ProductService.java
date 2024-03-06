@@ -4,13 +4,19 @@ import com.codejava.orderapp.entities.Product;
 import com.codejava.orderapp.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProductService {
-    @Autowired
+
     ProductRepository productRepository;
+
+    @Autowired
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     public Product addProduct(Product product) {
         return productRepository.save(product);
@@ -48,8 +54,8 @@ public class ProductService {
 
     public String updateProduct(Long productId, Product updatedProduct) {
         Product existingProduct = searchProductById(productId);
-            // Update fields of existingProduct with fields from updatedProduct
-        if(existingProduct!=null){
+        // Update fields of existingProduct with fields from updatedProduct
+        if (existingProduct != null) {
             existingProduct.setName(updatedProduct.getName());
             existingProduct.setPrice(updatedProduct.getPrice());
             existingProduct.setQuantity(updatedProduct.getQuantity());

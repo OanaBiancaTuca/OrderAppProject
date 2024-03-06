@@ -17,7 +17,7 @@ import lombok.*;
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderItem_id;
+    private Long orderItemId;
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
@@ -28,7 +28,7 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
-     @JsonIgnore
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -36,10 +36,10 @@ public class OrderItem {
 
     public String writeOrderItemDescription() {
         return "OrderItem{" +
-                "orderItem_id=" + orderItem_id +
+                "orderItem_id=" + orderItemId +
                 ", product=" + product.getName() +
                 ", quantity=" + quantity +
-                ", customer = "+user.getId()+
+                ", customer = " + user.getId() +
                 ", order=" + order +
                 '}';
     }

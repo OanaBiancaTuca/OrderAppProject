@@ -1,9 +1,9 @@
 package com.codejava.orderapp.controllers.order;
 
+import com.codejava.orderapp.entities.User;
 import com.codejava.orderapp.entities.order.OrderItem;
 import com.codejava.orderapp.repositories.UserRepository;
 import com.codejava.orderapp.services.order.OrderItemService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,17 +11,21 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/basket")
 public class OrderItemController {
-    @Autowired
     OrderItemService orderItemService;
+    UserRepository userRepository;
 
     @Autowired
-    UserRepository userRepository;
+    public OrderItemController(OrderItemService orderItemService, UserRepository userRepository) {
+        this.orderItemService = orderItemService;
+        this.userRepository = userRepository;
+    }
 
     // Endpoint for creating an orderItem
     @PostMapping
@@ -63,8 +67,14 @@ public class OrderItemController {
     public ResponseEntity<List<OrderItem>> getAllOrderItemsForCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserName = authentication.getName();
-        Long userId = userRepository.findByUsername(currentUserName).get().getId();
-        List<OrderItem> orderItems = orderItemService.getAllOrderItemsForCurrentUser(userId);
+        Long userId;
+        List<OrderItem> orderItems = new ArrayList<>();
+        Optional<User> optionalUser = userRepository.findByUsername(currentUserName);
+        if (optionalUser.isPresent()) {
+            userId = optionalUser.get().getId();
+            orderItems = orderItemService.getAllOrderItemsForCurrentUser(userId);
+        }
+
         return ResponseEntity.ok(orderItems);
     }
 

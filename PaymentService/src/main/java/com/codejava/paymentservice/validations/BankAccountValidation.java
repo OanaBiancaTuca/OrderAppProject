@@ -57,7 +57,7 @@ public class BankAccountValidation {
     }
 
     public static boolean validHolderAndCustomer(String holderName, String customerName) {
-        return (holderName != null && holderName.length() > 3 &&
+        return (holderName != null && holderName.length() > 2 &&
                 customerName != null && customerName.length() > 3);
     }
 }

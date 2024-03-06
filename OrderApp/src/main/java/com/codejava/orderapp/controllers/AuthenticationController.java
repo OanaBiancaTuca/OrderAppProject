@@ -3,7 +3,6 @@ package com.codejava.orderapp.controllers;
 import com.codejava.orderapp.entities.LoginResponseDTO;
 import com.codejava.orderapp.entities.User;
 import com.codejava.orderapp.services.AuthenticationService;
-import exceptions.RegistrationException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 public class AuthenticationController {
 
-    @Autowired
+
     private AuthenticationService authenticationService;
+
+    @Autowired
+    public AuthenticationController(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody User user) {

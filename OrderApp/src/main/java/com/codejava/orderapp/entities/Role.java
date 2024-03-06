@@ -1,7 +1,6 @@
 package com.codejava.orderapp.entities;
 
 import jakarta.persistence.*;
-import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 
 @Entity
@@ -33,10 +32,6 @@ public class Role implements GrantedAuthority {
 
     public void setAuthority(String authority) {
         this.authority = authority;
-    }
-
-    public Integer getRoleId() {
-        return roleId;
     }
 
     public void setRoleId(Integer roleId) {

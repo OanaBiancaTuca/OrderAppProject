@@ -16,8 +16,12 @@ import java.util.List;
 public class ProductController {
 
 
-    @Autowired
     ProductService productService;
+
+    @Autowired
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @GetMapping
     public List<Product> getAllProducts() {
@@ -41,7 +45,7 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{productId}")
     public ResponseEntity<String> deleteProduct(@PathVariable Long productId) {
-        if (productService.searchProductById(productId)!=null) {
+        if (productService.searchProductById(productId) != null) {
             productService.deleteProduct(productId);
             return ResponseEntity.status(HttpStatus.OK).body("Product is successfully deleted ");
         } else {

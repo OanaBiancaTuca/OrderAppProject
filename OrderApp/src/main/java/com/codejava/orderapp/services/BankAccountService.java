@@ -5,8 +5,6 @@ import com.codejava.orderapp.entities.User;
 import com.codejava.orderapp.repositories.BankAccountRepository;
 import com.codejava.orderapp.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,14 +17,14 @@ import java.util.List;
 
 @Service
 public class BankAccountService {
-
-
-    @Autowired
     private BankAccountRepository bankRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    public BankAccountService(BankAccountRepository bankRepository, UserRepository userRepository) {
+        this.bankRepository = bankRepository;
+        this.userRepository = userRepository;
+    }
 
     public BankAccount addAccount(BankAccount account) {
         User user = getCurrentUser();

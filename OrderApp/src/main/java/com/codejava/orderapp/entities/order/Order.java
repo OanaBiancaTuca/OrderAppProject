@@ -2,10 +2,8 @@ package com.codejava.orderapp.entities.order;
 
 import com.codejava.orderapp.entities.BankAccount;
 import com.codejava.orderapp.entities.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.ToString.Exclude;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import java.util.List;
@@ -26,7 +24,7 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
-    @ManyToOne(cascade =CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id")
     private User user;
     @ManyToOne(cascade = CascadeType.MERGE)

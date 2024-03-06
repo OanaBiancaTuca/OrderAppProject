@@ -20,21 +20,26 @@ import java.util.Optional;
 
 @Service
 public class OrderService {
-    @Autowired
     OrderRepository orderRepository;
-    @Autowired
     UserRepository userRepository;
-    @Autowired
     BankAccountRepository bankAccountRepository;
-    @Autowired
     OrderItemRepository orderItemRepository;
+
+    @Autowired
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository,
+                        BankAccountRepository bankAccountRepository, OrderItemRepository orderItemRepository) {
+        this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
+        this.bankAccountRepository = bankAccountRepository;
+        this.orderItemRepository = orderItemRepository;
+    }
 
     public Order placeOrder(Order order) {
         // Finding bank account by ID
         Optional<BankAccount> bankAccount = bankAccountRepository.findById(order.getBankAccount().getAccountId());
         List<OrderItem> orderItems = order.getItems();
         // Updating order items if they exist in the repository
-        orderItems.replaceAll(item -> (orderItemRepository.findById(item.getOrderItem_id())).get());
+        orderItems.replaceAll(item -> (orderItemRepository.findById(item.getOrderItemId())).get());
         // Setting updated order items and calculating total amount
         order.setItems(orderItems);
         double totalAmount = calculateTotalAmount(order);

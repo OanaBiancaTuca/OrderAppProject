@@ -18,18 +18,22 @@ import java.util.Optional;
 
 @Service
 public class OrderItemService {
-    @Autowired
     ProductRepository productRepository;
-    @Autowired
     OrderItemRepository orderItemRepository;
-    @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    public OrderItemService(ProductRepository productRepository, OrderItemRepository orderItemRepository, UserRepository userRepository) {
+        this.productRepository = productRepository;
+        this.orderItemRepository = orderItemRepository;
+        this.userRepository = userRepository;
+    }
 
     public OrderItem createOrderItem(OrderItem orderItem) {
         Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());
         User currentUser = getCurrentUser();
         orderItem.setUser(currentUser);
-        orderItem.setProduct(product.get());
+        product.ifPresent(orderItem::setProduct);
         return orderItemRepository.save(orderItem);
     }
 

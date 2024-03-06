@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 
 public class FeedbackService {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private final UpdateOrderService updateOrderService;
 
@@ -23,24 +23,25 @@ public class FeedbackService {
     public void handle(ConsumerRecord<Long, String> response) {
         // Extracting orderId and response from the Kafka message
         Long orderId = response.key();
-        logger.info("Received a new event: %ld - %s", orderId, response.value());
+        LOGGER.info("Received a new event: {0} - {1}", orderId, response.value());
         // Process validation response
         updateOrderService.processValidationResponse(orderId, response.value());
         if (updateOrderService.updateOrderStatus(orderId).equals("ACCEPTED")) {
-            logger.info("Order {} is accepted!", orderId);
+            LOGGER.info("Order {} is accepted!", orderId);
             //update stock
             updateOrderService.updateStock(orderId);
             //Uncomment this to send notifications via email, and also configure the username and password for sending emails
             // updateOrderService.sendEmailToCustomer(orderId);
+            LOGGER.info("Order {} is accepted!", orderId);
 
         } else if (updateOrderService.updateOrderStatus(orderId).equals("REJECTED")) {
-            logger.info("Order {} is rejected", orderId);
+            LOGGER.info("Order {} is rejected", orderId);
 
             //send email to inform user
             // updateOrderService.sendEmailToCustomer(orderId);
 
         } else {
-            logger.info("Order {} is in pending..", orderId);
+            LOGGER.info("Order {} is in pending..", orderId);
         }
 
     }

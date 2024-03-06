@@ -23,14 +23,19 @@ public class UpdateOrderService {
     public static final String ACCEPTED = "ACCEPTED";
     public static final String REJECTED = "REJECTED";
     public static final String PENDING = "PENDING";
-    @Autowired
     private OrderRepository orderRepository;
-    @Autowired
     private ValidationResponseRepository validationResponseRepository;
-    @Autowired
     private JavaMailSender mailSender;
-    @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    public UpdateOrderService(OrderRepository orderRepository, ValidationResponseRepository validationResponseRepository,
+                              JavaMailSender mailSender, ProductRepository productRepository) {
+        this.orderRepository = orderRepository;
+        this.validationResponseRepository = validationResponseRepository;
+        this.mailSender = mailSender;
+        this.productRepository = productRepository;
+    }
 
     // Process validation response received from Kafka and save it
     public void processValidationResponse(Long orderId, String response) {
@@ -67,7 +72,6 @@ public class UpdateOrderService {
             Product product = item.getProduct();
             product.setQuantity(product.getQuantity() - item.getQuantity());
             productRepository.save(product);
-
         }
 
     }
@@ -83,13 +87,12 @@ public class UpdateOrderService {
 
     // Send email notification to the customer about order status
     public void sendEmailToCustomer(Long orderId) {
-        Order order = orderRepository.getReferenceById(orderId);
+        Order order = getOrderById(orderId);
         User user = order.getUser();
         SimpleMailMessage message = new SimpleMailMessage();
         // Construct email body with order details
         StringBuilder emailBody = new StringBuilder();
-        emailBody.append("Dear ").append(user.getName()).append(",\n\n");
-        emailBody.append("Your order is : " + order.getStatus() + "\n\n");
+        emailBody.append("Dear ").append(user.getName()).append(",\n\n").append("Your order is : ").append(order.getStatus()).append("\n\n");
         if (order.getStatus().equals(OrderStatus.REJECTED)) {
             List<ValidationResponse> validationResponses = validationResponseRepository.findByOrderId(orderId);
             for (ValidationResponse response : validationResponses) {

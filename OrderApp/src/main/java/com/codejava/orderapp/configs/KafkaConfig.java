@@ -10,7 +10,6 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,20 +34,22 @@ public class KafkaConfig {
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
         return config;
     }
+
     @Bean
-    ProducerFactory<Long, Order> producerFactory(){
+    ProducerFactory<Long, Order> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
     @Bean
-    KafkaTemplate<Long, Order> kafkaTemplate(){
-        return new KafkaTemplate<Long,Order>(producerFactory());
+    KafkaTemplate<Long, Order> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
     }
+
     @Bean
-    NewTopic createTopic(){
+    NewTopic createTopic() {
         return TopicBuilder.name("order-topic")
                 .partitions(3).replicas(2)
-                .configs(Map.of("min.insync.replicas","2"))
+                .configs(Map.of("min.insync.replicas", "2"))
                 .build();
     }
 }

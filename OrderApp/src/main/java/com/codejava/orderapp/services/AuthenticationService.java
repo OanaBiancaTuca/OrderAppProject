@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,20 +23,23 @@ import java.util.Set;
 @Service
 @Transactional
 public class AuthenticationService {
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private AuthenticationManager authenticationManager;
+    private JWTService tokenService;
 
     @Autowired
-    private JWTService tokenService;
+    public AuthenticationService(UserRepository userRepository, RoleRepository roleRepository,
+                                 PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
+                                 JWTService tokenService) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.tokenService = tokenService;
+    }
 
     // Method to register a new user
     public ResponseEntity<String> registerUser(User user) {
@@ -74,9 +76,7 @@ public class AuthenticationService {
     // Method to authenticate and login a user
     public ResponseEntity<LoginResponseDTO> loginUser(String username, String password) {
         try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
             Optional<User> user = userRepository.findByUsername(username);
             // If user exists, generate JWT token and return login response

@@ -196,7 +196,7 @@ Response:
 ````
 [
     {
-        "orderItem_id": 1,
+        "orderItemId": 1,
         "product": {
             "productId": 1,
             "name": "Iphone 11",
@@ -206,7 +206,7 @@ Response:
         "quantity": 1
     },
     {
-        "orderItem_id": 2,
+        "orderItemId": 2,
         "product": {
             "productId": 3,
             "name": "Apple Watch 9 ",
@@ -227,8 +227,8 @@ Request:
 ```
 {
     "items":[
-        { "orderItem_id":1},
-         { "orderItem_id":2}
+        { "orderItemId":1},
+         { "orderItemId":2}
         
         ],
     "bankAccount":{
