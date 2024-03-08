@@ -35,8 +35,13 @@ public class OrderService {
     }
 
     public Order placeOrder(Order order) {
+        order.setUser(getCurrentUser());
+        Optional<BankAccount> bankAccount = null;
         // Finding bank account by ID
-        Optional<BankAccount> bankAccount = bankAccountRepository.findById(order.getBankAccount().getAccountId());
+        if (order.getBankAccount() == null) return null;
+        bankAccount = bankAccountRepository.findById(order.getBankAccount().getAccountId());
+        if(!bankAccount.get().getUser().getId().equals(order.getUser().getId())) return null;
+        if(order.getItems()==null) return null;
         List<OrderItem> orderItems = order.getItems();
         // Updating order items if they exist in the repository
         orderItems.replaceAll(item -> (orderItemRepository.findById(item.getOrderItemId())).get());
@@ -47,7 +52,6 @@ public class OrderService {
         // Setting bank account, order status, and user
         bankAccount.ifPresent(order::setBankAccount);
         order.setStatus(OrderStatus.PENDING);
-        order.setUser(getCurrentUser());
         // Saving the order and returning it
         return orderRepository.save(order);
     }

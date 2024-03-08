@@ -41,13 +41,13 @@ public class KafkaProducerConfig {
 
     @Bean
     KafkaTemplate<Long, String> kafkaTemplate() {
-        return new KafkaTemplate<Long, String>(producerFactory());
+        return new KafkaTemplate<>(producerFactory());
     }
 
     @Bean
     NewTopic createTopic() {
         return TopicBuilder.name("feedback-topic").partitions(3).replicas(2)
-                .configs(Map.of("min.insync.replicas","2"))
+                .configs(Map.of("min.insync.replicas", "2"))
                 .build();
     }
 

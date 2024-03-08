@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/orders")
 public class OrderController {
 
-    KafkaTemplate<Long, Order> kafkaTemplate;
+    private KafkaTemplate<Long, Order> kafkaTemplate;
     private OrderService orderService;
     private OrderItemService orderItemService;
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
@@ -31,10 +31,16 @@ public class OrderController {
         this.orderItemService = orderItemService;
     }
 
+
     @PostMapping
     public ResponseEntity<String> placeOrder(@RequestBody Order order) {
-        LOGGER.info("##### Received order: {}", order);
+        LOGGER.info("##### Received order ");
         Order savedOrder = orderService.placeOrder(order);
+        if (savedOrder == null) {
+            LOGGER.info("******** Message was send, but order is not valid");
+            kafkaTemplate.send("order-topic", order.getOrderId(), order);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request ...");
+        }
         for (OrderItem orderItem : savedOrder.getItems()) {
             orderItemService.updateOrderForOrderItem(orderItem.getOrderItemId(), savedOrder);
         }

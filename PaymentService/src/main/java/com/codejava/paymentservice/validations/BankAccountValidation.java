@@ -6,20 +6,22 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 
 public class BankAccountValidation {
+    private static final String ACCEPTED ="ACCEPTED";
+    private static final String REJECTED = "REJECTED";
     private BankAccountValidation() {}
 
-    public static Boolean validateAccount(BankAccount account) {
+    public static String validateAccount(BankAccount account) {
         // card number must consist of exactly 16 digits.
-        if (!isValidCardNumber(account.getCardNumber())) return false;
+        if (!isValidCardNumber(account.getCardNumber())) return REJECTED;
         // CVV must consist of exactly 3 digits.
-        if (!isValidCvv(account.getCvv())) return false;
+        if (!isValidCvv(account.getCvv())) return REJECTED;
         // accountHolderName and nameOnCard fields must not be null.
-        if (!validHolderAndCustomer(account.getAccountHolderName(), account.getNameOnCard())) return false;
+        if (!validHolderAndCustomer(account.getAccountHolderName(), account.getNameOnCard())) return REJECTED;
         //IBAN in Romania consists of 24 characters
-        if (!isValidIban(account.getIbanNumber())) return false;
+        if (!isValidIban(account.getIbanNumber())) return REJECTED;
         // must have a date greater than or equal to the day the order is made.
-        if (!isValidDate(account.getExpiryMonth(), account.getExpiryYear())) return false;
-        return true;
+        if (!isValidDate(account.getExpiryMonth(), account.getExpiryYear())) return REJECTED;
+        return ACCEPTED;
     }
 
     private static boolean isValidDate(Integer expiryMonth, Integer expiryYear) {

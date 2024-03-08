@@ -9,14 +9,13 @@ public class StockValidation {
     private StockValidation() {
     }
 
-    public static boolean validateStock(List<OrderItem> items) {
-        Boolean isValidOrder = true;
+    public static String validateStock(List<OrderItem> items) {
         //Validation for stock for every product ordered.
         for (OrderItem orderItem : items) {
             Product product = orderItem.getProduct();
             if (product.getQuantity() < orderItem.getQuantity())
-                isValidOrder = false;
+                return "REJECTED";
         }
-        return isValidOrder;
+        return "ACCEPTED";
     }
 }
