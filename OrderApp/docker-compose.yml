@@ -3,12 +3,16 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
+    networks:
+      project:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
 
   kafka1:
     image: confluentinc/cp-kafka:latest
     container_name: kafka1
+    networks:
+      project:
     ports:
       - "9092:9092"
     depends_on:
@@ -23,6 +27,8 @@ services:
   kafka2:
     image: confluentinc/cp-kafka:latest
     container_name: kafka2
+    networks:
+      project:
     ports:
       - "9094:9094"
     depends_on:
@@ -37,6 +43,8 @@ services:
   kafka3:
     image: confluentinc/cp-kafka:latest
     container_name: kafka3
+    networks:
+      project:
     ports:
       - "9096:9096"
     depends_on:
@@ -47,3 +55,56 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: EXTERNAL://localhost:9096,INTERNAL://kafka3:9097
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  kafka-ui:
+   image: provectuslabs/kafka-ui:latest
+   container_name: kafka-ui
+   networks:
+     project:
+   depends_on:
+    - zookeeper
+    - kafka1
+   ports:
+    - "8090:8080"
+   environment:
+    KAFKA_CLUSTERS_0_NAME: local
+    KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9093, kafka2:9095, kafka3:9097
+    KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+networks:
+  project:
+
+
+#  database:
+#    image: postgres
+#    container_name: database
+#    volumes:
+#      - stock-db-data:/var/lib/postgresql/data
+#    environment:
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=postgres
+#      - POSTGRES_DB=productsdb
+#    ports:
+#      - "5432:5432"
+#
+#  backend:
+#    build:
+#      dockerfile: Dockerfile
+#    container_name: orderapp_container
+#    ports:
+#      - 8080:8080
+#    environment:
+#      - spring.datasource.url=jdbc:postgresql://database:5432/productsdb
+#      - spring.datasource.username=postgres
+#      - spring.datasource.password=postgres
+#      - spring.kafka.producer.bootstrap-servers=kafka1:9092,kafka2:9094,kafka3:9096
+#      - spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.LongSerializer
+#      - spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+#      - spring.kafka.producer.acks = all
+#      - spring.kafka.producer.retries=10
+#      - spring.kafka.producer.properties.retry.backoff.ms =1000
+#      - spring.kafka.producer.properties.delivery.timeout.ms = 120000
+#      - spring.kafka.producer.properties.linger.ms=0
+#      - spring.kafka.producer.properties.request.timeout.ms=30000
+#    depends_on:
+#    - database
+#volumes:
+#  stock-db-data:
