@@ -1,16 +1,18 @@
 package com.codejava.feedbackservice.services;
 
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 
 @Component
-
+@Slf4j
 public class FeedbackService {
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private final UpdateOrderService updateOrderService;
 
@@ -20,28 +22,29 @@ public class FeedbackService {
 
     // Kafka message listener
     @KafkaListener(topics = "feedback-topic", groupId = "feedback-group")
-    public void handle(ConsumerRecord<Long, String> response) {
+    public void handle(ConsumerRecord<Long, String> response,  Acknowledgment ak) {
         // Extracting orderId and response from the Kafka message
         Long orderId = response.key();
-        LOGGER.info("Received a new event: {0} - {1}", orderId, response.value());
+        log.info("Received a new event: {} - {}", orderId, response.value());
         // Process validation response
         updateOrderService.processValidationResponse(orderId, response.value());
         if (updateOrderService.updateOrderStatus(orderId).equals("ACCEPTED")) {
-            LOGGER.info("Order {} is accepted!", orderId);
+            log.info("Order {} is accepted!", orderId);
             //update stock
             updateOrderService.updateStock(orderId);
             //Uncomment this to send notifications via email, and also configure the username and password for sending emails
             // updateOrderService.sendEmailToCustomer(orderId);
-            LOGGER.info("Order {} is accepted!", orderId);
-
+            log.info("Order {} is accepted!", orderId);
+            ak.acknowledge();
         } else if (updateOrderService.updateOrderStatus(orderId).equals("REJECTED")) {
-            LOGGER.info("Order {} is rejected", orderId);
+            log.info("Order {} is rejected", orderId);
 
             //send email to inform user
             // updateOrderService.sendEmailToCustomer(orderId);
-
+            ak.acknowledge();
         } else {
-            LOGGER.info("Order {} is in pending..", orderId);
+            log.info("Order {} is in pending..", orderId);
+            ak.acknowledge();
         }
 
     }

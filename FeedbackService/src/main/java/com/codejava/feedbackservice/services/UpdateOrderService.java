@@ -1,6 +1,7 @@
 package com.codejava.feedbackservice.services;
 
 import com.codejava.feedbackservice.entities.ValidationResponse;
+import com.codejava.feedbackservice.exceptions.InvalidFeedbackException;
 import com.codejava.feedbackservice.repositories.OrderRepository;
 import com.codejava.feedbackservice.repositories.ProductRepository;
 import com.codejava.feedbackservice.repositories.ValidationResponseRepository;
@@ -40,6 +41,12 @@ public class UpdateOrderService {
     // Process validation response received from Kafka and save it
     public void processValidationResponse(Long orderId, String response) {
         String[] details = response.split("_");
+        if (details.length != 2) {
+            throw new InvalidFeedbackException();
+        }
+        if (!details[0].equals("StockService") && !details[0].equals("PaymentService")) {
+            throw new InvalidFeedbackException();
+        }
         ValidationResponse validationResponse = ValidationResponse.builder()
                 .orderId(orderId)
                 .response(details[1])

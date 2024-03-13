@@ -10,6 +10,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.CommonErrorHandler;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
@@ -22,21 +24,25 @@ public class KafkaConsumerConfig {
     Environment environment;
 
     @Bean
-    public ConsumerFactory<Long, Object> consumerFactory() {
+    public ConsumerFactory<Long, String> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(JsonDeserializer.TRUSTED_PACKAGES, environment.getProperty("spring.kafka.consumer.properties.spring.json.trusted.packages"));
         config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
+        //auto commit disable
+        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,"false");
         return new DefaultKafkaConsumerFactory<>(config);
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<Long, Object> kafkaListenerContainerFactory(
-            ConsumerFactory<Long, Object> consumerFactory) {
-        ConcurrentKafkaListenerContainerFactory<Long, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    ConcurrentKafkaListenerContainerFactory<Long, String> kafkaListenerContainerFactory(
+            ConsumerFactory<Long, String> consumerFactory, CommonErrorHandler commonErrorHandler) {
+        ConcurrentKafkaListenerContainerFactory<Long, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.setConsumerFactory(consumerFactory);
+        factory.setCommonErrorHandler(commonErrorHandler);
         return factory;
     }
 
