@@ -22,10 +22,15 @@ import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * Configuration class for setting up Kafka consumers
+ * This class defines methods for configuring consumer, error handling, and
+ * Dead Letter Topic (DLT) settings for Kafka listeners.
+ */
 @Configuration
 public class KafkaConsumerConfig {
 
+    //The environment variable is used to access application properties.
     Environment environment;
 
     @Autowired
@@ -33,19 +38,24 @@ public class KafkaConsumerConfig {
         this.environment = environment;
     }
 
+
     @Bean
     public ConsumerFactory<Long, Object> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
-        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
-        //when errorhandling the serializer class is used as a value deserializer then it will use this json serializer  class to deserializer message payload
+        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                ErrorHandlingDeserializer.class);//when error handling the serializer class is used as a value deserializer then it will use this json serializer  class to deserializer message payload
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
         config.put(JsonDeserializer.TRUSTED_PACKAGES, environment.getProperty("spring.kafka.consumer.properties.spring.json.trusted.packages"));
         config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
         return new DefaultKafkaConsumerFactory<>(config);
     }
 
+    /**
+     * Configures the KafkaListenerContainerFactory for creating Kafka listener containers.
+     * Also sets up error handling and DLT settings for Kafka listeners.
+     */
     @Bean
     ConcurrentKafkaListenerContainerFactory<Long, Object> kafkaListenerContainerFactory(
             ConsumerFactory<Long, Object> consumerFactory, KafkaTemplate<Long, Object> kafkaTemplateDLT) {
@@ -63,7 +73,9 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
-    //DEAD LETTER TOPIC
+    /**
+     * Configures a KafkaTemplate for sending messages to the DLT.
+     */
     @Bean
     KafkaTemplate<Long, Object> kafkaTemplateDLT(ProducerFactory<Long, Object> producerFactoryDLT) {
         return new KafkaTemplate<>(producerFactoryDLT);
