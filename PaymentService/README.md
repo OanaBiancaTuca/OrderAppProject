@@ -65,7 +65,7 @@ PaymentService_ACCEPTED
 4. Consume message from FeedbackService
    ![](assets/paymentServiceAccepted.png)
 5. How the order looks in Kafka-ui
-   ![Kafka UI](assets/messageInKafkaUi.png)
+   ![Kafka UI](assets/messageInKafkaUI.png)
 
 ```
 {
