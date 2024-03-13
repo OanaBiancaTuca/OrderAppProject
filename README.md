@@ -326,3 +326,6 @@ id      order_id        response           type_of_validation
 ###### Rejected order:
 
 ![Alt text](assets/email_orderRejected.png)
+
+## Useful project:
+ [Apache Kafka for Event-Driven Spring Boot Microservices](https://github.com/OanaBiancaTuca/kafkaCourseUdemy/tree/master)
