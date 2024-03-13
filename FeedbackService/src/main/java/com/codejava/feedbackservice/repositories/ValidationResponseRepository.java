@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ValidationResponseRepository extends JpaRepository<ValidationResponse,Long> {
     List<ValidationResponse> findByOrderId(Long orderId);
+
+    ValidationResponse findByOrderIdAndTypeOfValidation(Long orderId, String validation);
 }
